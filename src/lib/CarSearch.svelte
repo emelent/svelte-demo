@@ -35,6 +35,19 @@
         )
     }
 
+    function getMin(cars) {
+        return (
+            cars.reduce((x, car) => car.attributes.price < x? car.attributes.price:x, cars[0].attributes.price)
+        )
+    }
+
+    function getMax(cars) {
+        return (
+            cars.reduce((x, car) => car.attributes.price > x? car.attributes.price:x, cars[0].attributes.price)
+        )
+    }
+
+
     const currencyFormat = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "ZAR",
@@ -93,15 +106,18 @@
     </div>
 </div>
 
-
+<br/>
+<br/>
+<br/>
 {#if carsPromise}
     {#await carsPromise}
         <p>...waiting</p>
     {:then cars}
+        <p>{cars.data.length} cars found</p><br/>
         {#if cars.data.length > 0}
-            <p>Average price is R {formatCurrency(getAverage(cars.data))}</p>
-        {:else}
-            <p>No cars found</p>
+            <h4>Average price is <b>{formatCurrency(getAverage(cars.data))}</b></h4>
+            <h4>Highest price is <b>{formatCurrency(getMax(cars.data))}</b></h4>
+            <h4>Lowest price is <b>{formatCurrency(getMin(cars.data))}</b></h4>
         {/if}
     {:catch error}
         <h3>Failed</h3>
