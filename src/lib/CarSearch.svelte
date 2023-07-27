@@ -1,5 +1,5 @@
 <script>
-    let search = "swift"
+    let search = ""
 
     function capitalizeEachWord(s) {
         return s
