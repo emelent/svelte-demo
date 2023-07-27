@@ -1,5 +1,5 @@
 <script>
-    let search = ""
+    let search = "swift"
 
     function capitalizeEachWord(s) {
         return s
@@ -102,6 +102,21 @@
         )
     }
 
+    function getMinCar(cars) {
+        return cars.reduce(
+            (car, prevCar) => (car.attributes.price < prevCar.attributes.price ? car : prevCar),
+            cars[0]
+        )
+    }
+
+    function getMaxCar(cars) {
+        return cars.reduce(
+            (car, prevCar) => (car.attributes.price > prevCar.attributes.price ? car : prevCar),
+            cars[0]
+        )
+    }
+
+
     const currencyFormat = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "ZAR",
@@ -125,6 +140,15 @@
             max_mileage = Math.min(min_mileage + mileage_step, mileage_limit)
         }
     }
+
+    function getCarImageUrl(car) {
+        const image = car.attributes.image
+        const slug = car.attributes.title
+            .replaceAll(" ", "-")
+            .replaceAll(".", "") + image.extension
+        return `https://img-ik.cars.co.za/ik-seo/${image.path}/${image.name}/${slug}`
+    }
+
 </script>
 
 <h2 class="font-bold">Mileage</h2>
@@ -199,7 +223,10 @@
     {:then cars}
         <p>{cars.data.length} cars found</p>
         {#if cars.data.length > 0}
+            {@const maxCar = getMaxCar(cars.data)}
+            {@const minCar = getMinCar(cars.data)}
             <div class="stats stats-vertical lg:stats-horizontal shadow">
+
                 <div class="stat">
                     <div class="stat-title">Average</div>
                     <div class="stat-value">
@@ -207,19 +234,33 @@
                     </div>
                 </div>
 
-                <div class="stat">
+                <a href={maxCar.attributes.website_url} target="_blank" class="stat">
                     <div class="stat-title">Highest</div>
                     <div class="stat-value text-neutral-content">
-                        {formatCurrency(getMax(cars.data))}
+                        {formatCurrency(maxCar.attributes.price)}
                     </div>
-                </div>
+                    <div class="stat-figure text-secondary">
+                        <div class="avatar">
+                            <div class="w-16 rounded-full">
+                            <img src={getCarImageUrl(maxCar)} />
+                            </div>
+                        </div>
+                    </div>
+                </a>
 
-                <div class="stat">
+                <a href={minCar.attributes.website_url} target="_blank" class="stat">
                     <div class="stat-title">Lowest</div>
                     <div class="stat-value text-neutral-content">
-                        {formatCurrency(getMin(cars.data))}
+                        {formatCurrency(minCar.attributes.price)}
                     </div>
-                </div>
+                    <div class="stat-figure text-secondary">
+                        <div class="avatar">
+                            <div class="w-16 rounded-full">
+                            <img src={getCarImageUrl(minCar)} />
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         {/if}
     {:catch error}
