@@ -118,6 +118,13 @@
     function formatKm(value) {
         return kmFormat.format(value)
     }
+
+    function handleMinMileageChange(event){
+        min_mileage = parseInt(event.target.value)
+        if(min_mileage >= max_mileage) {
+            max_mileage = Math.min(min_mileage + mileage_step, mileage_limit)
+        }
+    }
 </script>
 
 <h2 class="font-bold">Mileage</h2>
@@ -131,7 +138,8 @@
         min={0}
         max={mileage_limit - mileage_step}
         step={mileage_step}
-        bind:value={min_mileage}
+        on:input={handleMinMileageChange}
+
         class="range"
     />
 </div>
@@ -142,7 +150,7 @@
     </label>
     <input
         type="range"
-        min={min_mileage}
+        min={min_mileage + mileage_step}
         max={mileage_limit}
         step={mileage_step}
         bind:value={max_mileage}
