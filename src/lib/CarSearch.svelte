@@ -192,16 +192,16 @@
         {#if cars.data.length > 0}
             <div class="stats stats-vertical lg:stats-horizontal shadow">
                 <div class="stat">
-                    <div class="stat-title">Highest</div>
-                    <div class="stat-value text-neutral-content">
-                        {formatCurrency(getMax(cars.data))}
+                    <div class="stat-title">Average</div>
+                    <div class="stat-value">
+                        {formatCurrency(getAverage(cars.data))}
                     </div>
                 </div>
 
                 <div class="stat">
-                    <div class="stat-title">Average</div>
-                    <div class="stat-value">
-                        {formatCurrency(getAverage(cars.data))}
+                    <div class="stat-title">Highest</div>
+                    <div class="stat-value text-neutral-content">
+                        {formatCurrency(getMax(cars.data))}
                     </div>
                 </div>
 
