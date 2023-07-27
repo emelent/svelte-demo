@@ -23,9 +23,7 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 3rem auto;
   text-align: center;
 }
 
