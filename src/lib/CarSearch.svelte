@@ -139,6 +139,7 @@
         max={mileage_limit - mileage_step}
         step={mileage_step}
         on:input={handleMinMileageChange}
+        value={min_mileage}
 
         class="range"
     />
