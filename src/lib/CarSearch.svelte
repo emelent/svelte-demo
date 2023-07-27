@@ -236,7 +236,7 @@
 
                 <a href={maxCar.attributes.website_url} target="_blank" class="stat">
                     <div class="stat-title">Highest</div>
-                    <div class="stat-value text-neutral-content">
+                    <div class="stat-value text-2xl text-neutral-content">
                         {formatCurrency(maxCar.attributes.price)}
                     </div>
                     <div class="stat-figure text-secondary">
@@ -250,7 +250,7 @@
 
                 <a href={minCar.attributes.website_url} target="_blank" class="stat">
                     <div class="stat-title">Lowest</div>
-                    <div class="stat-value text-neutral-content">
+                    <div class="stat-value text-2xl text-neutral-content">
                         {formatCurrency(minCar.attributes.price)}
                     </div>
                     <div class="stat-figure text-secondary">
