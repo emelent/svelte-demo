@@ -156,7 +156,7 @@
 <br/>
 {#if carsPromise}
     {#await carsPromise}
-        <p>...waiting</p>
+        <span class="loading loading-spinner loading-lg"></span>
     {:then cars}
         <p>{cars.data.length} cars found</p><br/>
         {#if cars.data.length > 0}
