@@ -1,9 +1,9 @@
 <script>
-    let make_model = "ford figo"
+    let make_model = ""
 
     $: model_variant = make_model
             .toLowerCase()
-            .split(".")
+            .split(";")
             .map((s) => s?`[${s[0].toUpperCase()}${s.substring(1, s.length)}]`:'')
             .join("")
     const minYear = 2010
