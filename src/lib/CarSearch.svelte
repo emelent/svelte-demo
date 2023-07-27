@@ -35,10 +35,10 @@
     }
 
     const minYear = 2010
-    const mileage_limit = 500000
+    const mileage_limit = 500_000
 
     let min_mileage = 0
-    let max_mileage = 50000
+    let max_mileage = 50_000
     let mileage_step = 5000
 
     let carsPromise = null
