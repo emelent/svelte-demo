@@ -5,7 +5,7 @@
         return s
             .split(" ")
             .map((s) => (s ? `${s[0].toUpperCase()}${s.slice(1)}` : ""))
-            .join(" ")
+            .join(" ").trim()
     }
 
     function createModelVariantParam(s) {
@@ -27,7 +27,7 @@
     }
 
     function createKeywordParam(s) {
-        return "&keyword=" + encodeURIComponent(s)
+        return "&keyword=" + encodeURIComponent(s.trim())
     }
 
     function isKeywordSearch(s) {
