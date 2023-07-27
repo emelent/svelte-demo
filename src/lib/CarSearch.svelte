@@ -3,7 +3,7 @@
 
     $: model_variant = make_model
             .toLowerCase()
-            .split(" ")
+            .split(".")
             .map((s) => s?`[${s[0].toUpperCase()}${s.substring(1, s.length)}]`:'')
             .join("")
     const minYear = 2010
@@ -12,7 +12,7 @@
     let max_mileage = 50000
 
     let carsPromise = null
-    let years = [...Array(new Date().getFullYear() - minYear)].map(
+    let years = [...Array(new Date().getFullYear() - minYear) + 1].map(
         (x, i) => minYear + i
     )
     let selectedYear
