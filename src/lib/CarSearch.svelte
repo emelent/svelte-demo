@@ -1,40 +1,77 @@
 <script>
-    let make_model = ""
+    let search = ""
 
-    $: model_variant = make_model
-            .toLowerCase()
-            .split(";")
-            .map((s) => s?`[${s[0].toUpperCase()}${s.substring(1, s.length)}]`:'')
-            .join("")
+    function capitalizeEachWord(s) {
+        return s
+            .split(" ")
+            .map((s) => (s ? `${s[0].toUpperCase()}${s.slice(1)}` : ""))
+            .join(" ")
+    }
+
+    function createModelVariantParam(s) {
+        return (
+            "&make_model_variant" +
+            s
+                .toLowerCase()
+                .split(";")
+                .map(capitalizeEachWord)
+                .map(encodeURIComponent)
+                .map((s) =>
+                    s
+                        ? `[${s[0].toUpperCase()}${s.substring(1, s.length)}]`
+                        : ""
+                )
+                .join("") +
+            "[All]"
+        )
+    }
+
+    function createKeywordParam(s) {
+        return "&keyword=" + encodeURIComponent(s)
+    }
+
+    function isKeywordSearch(s) {
+        return s.indexOf(";") == -1
+    }
+
     const minYear = 2010
-
     const mileage_limit = 500000
+
     let min_mileage = 0
     let max_mileage = 50000
     let mileage_step = 5000
 
     let carsPromise = null
-    let years = [...Array(new Date().getFullYear() - minYear) + 1].map(
+    let years = [...(Array(new Date().getFullYear() - minYear) + 1)].map(
         (x, i) => minYear + i
     )
     let provinces = [
-        'Gauteng',
-        'Limpopo',
-        'Northern Cape',
-        'Eastern Cape',
-        'Western Cape',
-        'North West Province',
-        'Mpumalanga',
-        'Kwazulu Natal',
-        'Free State'
+        "Gauteng",
+        "Limpopo",
+        "Northern Cape",
+        "Eastern Cape",
+        "Western Cape",
+        "North West Province",
+        "Mpumalanga",
+        "Kwazulu Natal",
+        "Free State",
     ]
 
-    let selectedYear
+    let selectedYear = 2021
     let selectedProvince
 
     function handleSearch() {
+        // &keyword=figo
+        const searchParam = isKeywordSearch(search)
+            ? createKeywordParam(search)
+            : createModelVariantParam(search)
+        console.log(searchParam)
         carsPromise = fetch(
-            `https://api.cars.co.za/fw/public/v3/vehicle?page[offset]=0&page[limit]=120&make_model_variant${model_variant}[All]&sort[date]=desc&mileage[0]=${min_mileage}-${max_mileage}&year[0]=${selectedYear}-${selectedYear}${selectedProvince? "&province[0]=" + encodeURIComponent(selectedProvince):""}`,
+            `https://api.cars.co.za/fw/public/v3/vehicle?page[offset]=0&page[limit]=120${searchParam}&sort[date]=desc&mileage[0]=${min_mileage}-${max_mileage}&year[0]=${selectedYear}-${selectedYear}${
+                selectedProvince
+                    ? "&province[0]=" + encodeURIComponent(selectedProvince)
+                    : ""
+            }`,
             {
                 body: null,
                 method: "GET",
@@ -52,17 +89,18 @@
     }
 
     function getMin(cars) {
-        return (
-            cars.reduce((x, car) => car.attributes.price < x? car.attributes.price:x, cars[0].attributes.price)
+        return cars.reduce(
+            (x, car) => (car.attributes.price < x ? car.attributes.price : x),
+            cars[0].attributes.price
         )
     }
 
     function getMax(cars) {
-        return (
-            cars.reduce((x, car) => car.attributes.price > x? car.attributes.price:x, cars[0].attributes.price)
+        return cars.reduce(
+            (x, car) => (car.attributes.price > x ? car.attributes.price : x),
+            cars[0].attributes.price
         )
     }
-
 
     const currencyFormat = new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -74,13 +112,12 @@
     }
 
     const kmFormat = new Intl.NumberFormat("en-ZA", {
-    style: "unit",
-    unit: "kilometer",
+        style: "unit",
+        unit: "kilometer",
     })
     function formatKm(value) {
         return kmFormat.format(value)
     }
-
 </script>
 
 <h2 class="font-bold">Mileage</h2>
@@ -88,7 +125,6 @@
     <label class="label">
         <span class="label-text">Minimum</span>
         <span class="label-text-alt font-bold">{formatKm(min_mileage)}</span>
-        
     </label>
     <input
         type="range"
@@ -113,15 +149,14 @@
         class="range"
     />
 </div>
-<br/>
 <div>
     <h2 class="mb-3 font-bold">Car</h2>
-    
+
     <div class="join">
         <input
-            bind:value={make_model}
+            bind:value={search}
             class="input input-bordered join-item"
-            placeholder="e.g. Ford;Figo"
+            placeholder="e.g. swift"
         />
 
         <select
@@ -137,10 +172,7 @@
         </select>
     </div>
 </div>
-<select
-    class="select select-bordered my-8"
-    bind:value={selectedProvince}
->
+<select class="select select-bordered my-8" bind:value={selectedProvince}>
     <option selected value="">Any province</option>
     {#each provinces as province}
         <option value={province}>
@@ -149,23 +181,39 @@
     {/each}
 </select>
 
-<button on:click={handleSearch} class="btn join-item btn-primary">Search</button>
+<button on:click={handleSearch} class="btn join-item btn-primary">Search</button
+>
 
-<br/>
-<br/>
-<br/>
 {#if carsPromise}
     {#await carsPromise}
-        <span class="loading loading-spinner loading-lg"></span>
+        <span class="loading loading-spinner loading-lg" />
     {:then cars}
-        <p>{cars.data.length} cars found</p><br/>
+        <p>{cars.data.length} cars found</p>
         {#if cars.data.length > 0}
-            <h4>Average price is <b>{formatCurrency(getAverage(cars.data))}</b></h4>
-            <h4>Highest price is <b>{formatCurrency(getMax(cars.data))}</b></h4>
-            <h4>Lowest price is <b>{formatCurrency(getMin(cars.data))}</b></h4>
+            <div class="stats stats-vertical lg:stats-horizontal shadow">
+                <div class="stat">
+                    <div class="stat-title">Highest</div>
+                    <div class="stat-value text-neutral-content">
+                        {formatCurrency(getMax(cars.data))}
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-title">Average</div>
+                    <div class="stat-value">
+                        {formatCurrency(getAverage(cars.data))}
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-title">Lowest</div>
+                    <div class="stat-value text-neutral-content">
+                        {formatCurrency(getMin(cars.data))}
+                    </div>
+                </div>
+            </div>
         {/if}
     {:catch error}
         <h3>Failed</h3>
     {/await}
 {/if}
-
