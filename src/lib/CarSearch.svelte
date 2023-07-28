@@ -42,7 +42,7 @@
     let mileage_step = 5000
 
     let carsPromise = null
-    let years = [...(Array(new Date().getFullYear() - minYear) + 1)].map(
+    let years = [...(Array(new Date().getFullYear() - minYear + 1))].map(
         (x, i) => minYear + i
     )
     let provinces = [
