@@ -1,4 +1,7 @@
-<script>
+<script lang="ts">
+    import { fetchCars } from "../../repository/cars"
+    import type { CarData } from "../../repository/types"
+    import { formatCurrency } from "../../utils/formatting"
     import { capitalizeEachWord } from "../../utils/strings"
     import { getCurrentYear } from "../../utils/time"
     import CarMileage from "../components/CarMileage.svelte"
@@ -26,91 +29,39 @@
     let model_search
 
 
-    function createModelVariantParam(s) {
-        return (
-            "&make_model_variant" +
-            s
-                .toLowerCase()
-                .split(";")
-                .map(capitalizeEachWord)
-                .map(encodeURIComponent)
-                .map((s) =>
-                    s
-                        ? `[${s[0].toUpperCase()}${s.substring(1, s.length)}]`
-                        : ""
-                )
-                .join("") +
-            "[All]"
-        )
-    }
-
-    function createKeywordParam(s) {
-        return "&keyword=" + encodeURIComponent(s.trim())
-    }
-
-    function isKeywordSearch(s) {
-        return s.indexOf(";") == -1
-    }
-
     function handleSearch() {
-        const searchParam = isKeywordSearch(model_search)
-            ? createKeywordParam(model_search)
-            : createModelVariantParam(model_search)
-        console.log(searchParam)
-        carsPromise = fetch(
-            `https://api.cars.co.za/fw/public/v3/vehicle?page[offset]=0&page[limit]=120${searchParam}&sort[date]=desc&mileage[0]=${min_mileage}-${max_mileage}&year[0]=${model_year}-${model_year}${
-                selectedProvince
-                    ? "&province[0]=" + encodeURIComponent(selectedProvince)
-                    : ""
-            }`,
-            {
-                body: null,
-                method: "GET",
-                mode: "cors",
-                credentials: "omit",
-            }
-        ).then((r) => r.json())
+
+        carsPromise = fetchCars({
+            maxMileage: max_mileage,
+            minMileage: min_mileage,
+            province: selectedProvince,
+            year: model_year,
+            search: model_search
+        })
     }
 
-    function getAverage(cars) {
-        return (
-            cars.reduce((total, car) => total + car.attributes.price, 0) /
-            cars.length
+    function getAvgPrice(cars: Array<CarData>): number {
+        return cars.reduce(
+                (total, car) => total + car.price, 
+                0
+            ) / cars.length
+    }
+
+    function getMinCar(cars: Array<CarData>): CarData {
+        return cars.reduce(
+            (prevCar, car) =>
+                car.price < prevCar.price ? car : prevCar,
+            cars[0]
         )
     }
-
-    function getMinCar(cars) {
+    function getMaxCar(cars: Array<CarData>): CarData {
         return cars.reduce(
-            (car, prevCar) =>
-                car.attributes.price < prevCar.attributes.price ? car : prevCar,
+            (prevCar, car) =>
+                car.price > prevCar.price ? car : prevCar,
             cars[0]
         )
     }
 
-    function getMaxCar(cars) {
-        return cars.reduce(
-            (car, prevCar) =>
-                car.attributes.price > prevCar.attributes.price ? car : prevCar,
-            cars[0]
-        )
-    }
-
-    const currencyFormat = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "ZAR",
-    })
-
-    function formatCurrency(value) {
-        return currencyFormat.format(value)
-    }
-
-    function getCarImageUrl(car) {
-        const image = car.attributes.image
-        const slug =
-            car.attributes.title.replaceAll(" ", "-").replaceAll(".", "") +
-            image.extension
-        return `https://img-ik.cars.co.za/ik-seo/${image.path}/${image.name}/${slug}`
-    }
 </script>
 
     <h2 class="font-bold">Mileage</h2>
@@ -141,49 +92,49 @@
     {#await carsPromise}
         <span class="loading loading-spinner loading-lg" />
     {:then cars}
-        <p>{cars.data.length} cars found</p>
-        {#if cars.data.length > 0}
-            {@const maxCar = getMaxCar(cars.data)}
-            {@const minCar = getMinCar(cars.data)}
+        <p>{cars.length} car(s) found</p>
+        {#if cars.length > 0}
+            {@const maxCar = getMaxCar(cars)}
+            {@const minCar = getMinCar(cars)}
             <div class="stats stats-vertical lg:stats-horizontal shadow">
                 <div class="stat">
                     <div class="stat-title">Average</div>
                     <div class="stat-value">
-                        {formatCurrency(getAverage(cars.data))}
+                        {formatCurrency(getAvgPrice(cars))}
                     </div>
                 </div>
 
                 <a
-                    href={maxCar.attributes.website_url}
+                    href={maxCar.infoUrl}
                     target="_blank"
                     class="stat"
                 >
                     <div class="stat-title">Highest</div>
                     <div class="stat-value text-2xl text-neutral-content">
-                        {formatCurrency(maxCar.attributes.price)}
+                        {formatCurrency(maxCar.price)}
                     </div>
                     <div class="stat-figure text-secondary">
                         <div class="avatar">
                             <div class="w-16 rounded-full">
-                                <img src={getCarImageUrl(maxCar)} alt="Car" />
+                                <img src={maxCar.imageUrl} alt="Car" />
                             </div>
                         </div>
                     </div>
                 </a>
 
                 <a
-                    href={minCar.attributes.website_url}
+                    href={minCar.infoUrl}
                     target="_blank"
                     class="stat"
                 >
                     <div class="stat-title">Lowest</div>
                     <div class="stat-value text-2xl text-neutral-content">
-                        {formatCurrency(minCar.attributes.price)}
+                        {formatCurrency(minCar.price)}
                     </div>
                     <div class="stat-figure text-secondary">
                         <div class="avatar">
                             <div class="w-16 rounded-full">
-                                <img src={getCarImageUrl(minCar)} alt="Car" />
+                                <img src={minCar.imageUrl} alt="Car" />
                             </div>
                         </div>
                     </div>
