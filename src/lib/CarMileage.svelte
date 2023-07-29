@@ -1,6 +1,6 @@
 <script>
-    export let upper_limit
-    export let step
+    const upper_limit = 500_000
+    const step = 5000
 
     export let min_mileage = 0
     export let max_mileage = 50_000
