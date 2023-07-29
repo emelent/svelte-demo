@@ -1,9 +1,9 @@
 <script>
-    import CarMileage from "./CarMileage.svelte"
+    import { capitalizeEachWord } from "../../utils/strings"
+    import { getCurrentYear } from "../../utils/time"
+    import CarMileage from "../components/CarMileage.svelte"
+    import CarModel from "../components/CarModel.svelte"
 
-    const mileage_upper_limit = 500_000
-    const mileage_step = 5000
-    const minYear = 2010
     const provinces = [
         "Gauteng",
         "Limpopo",
@@ -20,22 +20,11 @@
     let max_mileage = 50_000
 
     let carsPromise = null
-    let years = [...Array(new Date().getFullYear() - minYear + 1)].map(
-        (x, i) => minYear + i
-    )
 
-
-    let selectedYear = 2021
+    let model_year = getCurrentYear() - 1
     let selectedProvince
-    let search
+    let model_search
 
-    function capitalizeEachWord(s) {
-        return s
-            .split(" ")
-            .map((s) => (s ? `${s[0].toUpperCase()}${s.slice(1)}` : ""))
-            .join(" ")
-            .trim()
-    }
 
     function createModelVariantParam(s) {
         return (
@@ -64,13 +53,12 @@
     }
 
     function handleSearch() {
-        // &keyword=figo
-        const searchParam = isKeywordSearch(search)
-            ? createKeywordParam(search)
-            : createModelVariantParam(search)
+        const searchParam = isKeywordSearch(model_search)
+            ? createKeywordParam(model_search)
+            : createModelVariantParam(model_search)
         console.log(searchParam)
         carsPromise = fetch(
-            `https://api.cars.co.za/fw/public/v3/vehicle?page[offset]=0&page[limit]=120${searchParam}&sort[date]=desc&mileage[0]=${min_mileage}-${max_mileage}&year[0]=${selectedYear}-${selectedYear}${
+            `https://api.cars.co.za/fw/public/v3/vehicle?page[offset]=0&page[limit]=120${searchParam}&sort[date]=desc&mileage[0]=${min_mileage}-${max_mileage}&year[0]=${model_year}-${model_year}${
                 selectedProvince
                     ? "&province[0]=" + encodeURIComponent(selectedProvince)
                     : ""
@@ -88,20 +76,6 @@
         return (
             cars.reduce((total, car) => total + car.attributes.price, 0) /
             cars.length
-        )
-    }
-
-    function getMin(cars) {
-        return cars.reduce(
-            (x, car) => (car.attributes.price < x ? car.attributes.price : x),
-            cars[0].attributes.price
-        )
-    }
-
-    function getMax(cars) {
-        return cars.reduce(
-            (x, car) => (car.attributes.price > x ? car.attributes.price : x),
-            cars[0].attributes.price
         )
     }
 
@@ -139,33 +113,18 @@
     }
 </script>
 
+    <h2 class="font-bold">Mileage</h2>
     <CarMileage 
-        upper_limit={mileage_upper_limit}
-        step={mileage_step}
         bind:max_mileage={max_mileage}
         bind:min_mileage={min_mileage}
     />
 
     <h2 class="mb-3 font-bold">Car</h2>
-    <div class="join w-full">
-        <input
-            bind:value={search}
-            class="input input-bordered join-item"
-            placeholder="e.g. swift"
-        />
+    <CarModel 
+        bind:search={model_search}
+        bind:year={model_year}
+    />
 
-        <select
-            class="select select-bordered join-item"
-            bind:value={selectedYear}
-        >
-            <option selected>Year</option>
-            {#each years as year}
-                <option value={year}>
-                    {year}
-                </option>
-            {/each}
-        </select>
-    </div>
 <select class="select select-bordered my-8 block w-full" bind:value={selectedProvince}>
     <option selected value="">Any province</option>
     {#each provinces as province}
