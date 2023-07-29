@@ -1,11 +1,40 @@
 <script>
-    let search = ""
+    import CarMileage from "./CarMileage.svelte"
+
+    const mileage_upper_limit = 500_000
+    const mileage_step = 5000
+    const minYear = 2010
+    const provinces = [
+        "Gauteng",
+        "Limpopo",
+        "Northern Cape",
+        "Eastern Cape",
+        "Western Cape",
+        "North West Province",
+        "Mpumalanga",
+        "Kwazulu Natal",
+        "Free State",
+    ]
+
+    let min_mileage = 0
+    let max_mileage = 50_000
+
+    let carsPromise = null
+    let years = [...Array(new Date().getFullYear() - minYear + 1)].map(
+        (x, i) => minYear + i
+    )
+
+
+    let selectedYear = 2021
+    let selectedProvince
+    let search
 
     function capitalizeEachWord(s) {
         return s
             .split(" ")
             .map((s) => (s ? `${s[0].toUpperCase()}${s.slice(1)}` : ""))
-            .join(" ").trim()
+            .join(" ")
+            .trim()
     }
 
     function createModelVariantParam(s) {
@@ -33,32 +62,6 @@
     function isKeywordSearch(s) {
         return s.indexOf(";") == -1
     }
-
-    const minYear = 2010
-    const mileage_limit = 500_000
-
-    let min_mileage = 0
-    let max_mileage = 50_000
-    let mileage_step = 5000
-
-    let carsPromise = null
-    let years = [...(Array(new Date().getFullYear() - minYear + 1))].map(
-        (x, i) => minYear + i
-    )
-    let provinces = [
-        "Gauteng",
-        "Limpopo",
-        "Northern Cape",
-        "Eastern Cape",
-        "Western Cape",
-        "North West Province",
-        "Mpumalanga",
-        "Kwazulu Natal",
-        "Free State",
-    ]
-
-    let selectedYear = 2021
-    let selectedProvince
 
     function handleSearch() {
         // &keyword=figo
@@ -104,18 +107,19 @@
 
     function getMinCar(cars) {
         return cars.reduce(
-            (car, prevCar) => (car.attributes.price < prevCar.attributes.price ? car : prevCar),
+            (car, prevCar) =>
+                car.attributes.price < prevCar.attributes.price ? car : prevCar,
             cars[0]
         )
     }
 
     function getMaxCar(cars) {
         return cars.reduce(
-            (car, prevCar) => (car.attributes.price > prevCar.attributes.price ? car : prevCar),
+            (car, prevCar) =>
+                car.attributes.price > prevCar.attributes.price ? car : prevCar,
             cars[0]
         )
     }
-
 
     const currencyFormat = new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -126,66 +130,24 @@
         return currencyFormat.format(value)
     }
 
-    const kmFormat = new Intl.NumberFormat("en-ZA", {
-        style: "unit",
-        unit: "kilometer",
-    })
-    function formatKm(value) {
-        return kmFormat.format(value)
-    }
-
-    function handleMinMileageChange(event){
-        min_mileage = parseInt(event.target.value)
-        if(min_mileage >= max_mileage) {
-            max_mileage = Math.min(min_mileage + mileage_step, mileage_limit)
-        }
-    }
-
     function getCarImageUrl(car) {
         const image = car.attributes.image
-        const slug = car.attributes.title
-            .replaceAll(" ", "-")
-            .replaceAll(".", "") + image.extension
+        const slug =
+            car.attributes.title.replaceAll(" ", "-").replaceAll(".", "") +
+            image.extension
         return `https://img-ik.cars.co.za/ik-seo/${image.path}/${image.name}/${slug}`
     }
-
 </script>
 
-<h2 class="font-bold">Mileage</h2>
-<div class="">
-    <label class="label">
-        <span class="label-text">Minimum</span>
-        <span class="label-text-alt font-bold">{formatKm(min_mileage)}</span>
-    </label>
-    <input
-        type="range"
-        min={0}
-        max={mileage_limit - mileage_step}
+    <CarMileage 
+        upper_limit={mileage_upper_limit}
         step={mileage_step}
-        on:input={handleMinMileageChange}
-        value={min_mileage}
+        bind:max_mileage={max_mileage}
+        bind:min_mileage={min_mileage}
+    />
 
-        class="range"
-    />
-</div>
-<div>
-    <label class="label">
-        <span class="label-text">Maximum</span>
-        <span class="label-text-alt font-bold">{formatKm(max_mileage)}</span>
-    </label>
-    <input
-        type="range"
-        min={min_mileage + mileage_step}
-        max={mileage_limit}
-        step={mileage_step}
-        bind:value={max_mileage}
-        class="range"
-    />
-</div>
-<div>
     <h2 class="mb-3 font-bold">Car</h2>
-
-    <div class="join">
+    <div class="join w-full">
         <input
             bind:value={search}
             class="input input-bordered join-item"
@@ -204,8 +166,7 @@
             {/each}
         </select>
     </div>
-</div>
-<select class="select select-bordered my-8" bind:value={selectedProvince}>
+<select class="select select-bordered my-8 block w-full" bind:value={selectedProvince}>
     <option selected value="">Any province</option>
     {#each provinces as province}
         <option value={province}>
@@ -214,7 +175,7 @@
     {/each}
 </select>
 
-<button on:click={handleSearch} class="btn join-item btn-primary">Search</button
+<button on:click={handleSearch} class="btn block m-auto join-item btn-primary">Search</button
 >
 
 {#if carsPromise}
@@ -226,7 +187,6 @@
             {@const maxCar = getMaxCar(cars.data)}
             {@const minCar = getMinCar(cars.data)}
             <div class="stats stats-vertical lg:stats-horizontal shadow">
-
                 <div class="stat">
                     <div class="stat-title">Average</div>
                     <div class="stat-value">
@@ -234,7 +194,11 @@
                     </div>
                 </div>
 
-                <a href={maxCar.attributes.website_url} target="_blank" class="stat">
+                <a
+                    href={maxCar.attributes.website_url}
+                    target="_blank"
+                    class="stat"
+                >
                     <div class="stat-title">Highest</div>
                     <div class="stat-value text-2xl text-neutral-content">
                         {formatCurrency(maxCar.attributes.price)}
@@ -242,13 +206,17 @@
                     <div class="stat-figure text-secondary">
                         <div class="avatar">
                             <div class="w-16 rounded-full">
-                            <img src={getCarImageUrl(maxCar)} />
+                                <img src={getCarImageUrl(maxCar)} alt="Car" />
                             </div>
                         </div>
                     </div>
                 </a>
 
-                <a href={minCar.attributes.website_url} target="_blank" class="stat">
+                <a
+                    href={minCar.attributes.website_url}
+                    target="_blank"
+                    class="stat"
+                >
                     <div class="stat-title">Lowest</div>
                     <div class="stat-value text-2xl text-neutral-content">
                         {formatCurrency(minCar.attributes.price)}
@@ -256,7 +224,7 @@
                     <div class="stat-figure text-secondary">
                         <div class="avatar">
                             <div class="w-16 rounded-full">
-                            <img src={getCarImageUrl(minCar)} />
+                                <img src={getCarImageUrl(minCar)} alt="Car" />
                             </div>
                         </div>
                     </div>
