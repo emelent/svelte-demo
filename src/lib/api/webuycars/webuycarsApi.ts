@@ -37,7 +37,6 @@ async function fetchCars(
         Year: [searchData.year]
     }
 
-    console.log(requestData)
     const response = await fetch(apiUrl, {
         headers: {
             "content-type": "application/json",
