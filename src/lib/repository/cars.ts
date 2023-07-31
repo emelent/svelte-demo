@@ -1,5 +1,6 @@
 import type { ApiOptions, CarData, SearchData } from "./types";
-import carscoza from "../api/cars.co.za/carsApi"
+import carsApi from "../api/cars.co.za/carsApi"
+import webuycarsApi from "../api/webuycars/webuycarsApi";
 
 const defaultApiOpts: ApiOptions = {
     autotrader: true,
@@ -14,7 +15,11 @@ export async function fetchCars(
     
     const promises = []
     if(opts.carscoza) {
-        promises.push(carscoza.fetchCars(searchData))
+        promises.push(carsApi.fetchCars(searchData))
+    }
+
+    if(opts.webuycars) {
+        promises.push(webuycarsApi.fetchCars(searchData))
     }
 
     const results = await Promise.allSettled(promises)
