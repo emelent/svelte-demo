@@ -1,6 +1,6 @@
 export interface CarsSearchResult {
     meta: Meta
-    data: Array<CarData>
+    data: Array<CarsVehicleData>
 }
 
 interface Meta {
@@ -9,7 +9,7 @@ interface Meta {
     currentPage: number
 }
 
-interface CarData {
+interface CarsVehicleData {
     type: string
     id: string
     attributes: Attributes
