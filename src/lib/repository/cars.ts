@@ -3,9 +3,9 @@ import carsApi from "../api/cars.co.za/carsApi"
 import webuycarsApi from "../api/webuycars/webuycarsApi";
 
 const defaultApiOpts: ApiOptions = {
-    autotrader: true,
-    carscoza: true,
-    webuycars: true
+    useAutotrader: true,
+    useCarscoza: true,
+    useWebuycars: true
 }
 
 export async function fetchCars(
@@ -14,11 +14,11 @@ export async function fetchCars(
 ): Promise<Array<CarData>> {
     
     const promises = []
-    if(opts.carscoza) {
+    if(opts.useCarscoza) {
         promises.push(carsApi.fetchCars(searchData))
     }
 
-    if(opts.webuycars) {
+    if(opts.useWebuycars) {
         promises.push(webuycarsApi.fetchCars(searchData))
     }
 

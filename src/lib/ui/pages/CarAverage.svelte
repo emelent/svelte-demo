@@ -3,6 +3,7 @@
     import type { CarData } from "../../repository/types"
     import { formatCurrency } from "../../utils/formatting"
     import { getCurrentYear } from "../../utils/time"
+    import ApiCheckBox from "../components/ApiCheckBox.svelte"
     import CarMileage from "../components/CarMileage.svelte"
     import CarModel from "../components/CarModel.svelte"
 
@@ -21,6 +22,9 @@
     let min_mileage = 0
     let max_mileage = 50_000
 
+    let useWebuycars = true
+    let useCarscoza = true
+
     let carsPromise = null
 
     let model_year = getCurrentYear() - 1
@@ -28,13 +32,20 @@
     let model_search
 
     function handleSearch() {
-        carsPromise = fetchCars({
-            maxMileage: max_mileage,
-            minMileage: min_mileage,
-            province: selectedProvince,
-            year: model_year,
-            search: model_search,
-        })
+        carsPromise = fetchCars(
+            {
+                maxMileage: max_mileage,
+                minMileage: min_mileage,
+                province: selectedProvince,
+                year: model_year,
+                search: model_search,
+            },
+            {
+                useAutotrader: false, 
+                useCarscoza, 
+                useWebuycars
+            }
+        )
     }
 
     function getAvgPrice(cars: Array<CarData>): number {
@@ -72,6 +83,9 @@
         </option>
     {/each}
 </select>
+
+<h2 class="font-bold">Api</h2>
+<ApiCheckBox bind:useCarscoza={useCarscoza} bind:useWebuycars={useWebuycars} />
 
 <button on:click={handleSearch} class="btn block m-auto join-item btn-primary"
     >Search</button

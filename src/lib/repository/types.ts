@@ -18,7 +18,7 @@ export interface SearchData{
 }
 
 export interface ApiOptions {
-    carscoza: boolean
-    autotrader: boolean
-    webuycars: boolean
+    useCarscoza: boolean
+    useAutotrader: boolean
+    useWebuycars: boolean
 }
