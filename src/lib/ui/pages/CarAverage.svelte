@@ -87,7 +87,7 @@
 <h2 class="font-bold">Api</h2>
 <ApiCheckBox bind:useCarscoza={useCarscoza} bind:useWebuycars={useWebuycars} />
 
-<button on:click={handleSearch} class="btn block m-auto join-item btn-primary"
+<button on:click={handleSearch} class="btn block m-auto join-item btn-primary my-4"
     >Search</button
 >
 
